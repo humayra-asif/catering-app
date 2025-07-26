@@ -116,7 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
               controller: _address,
               decoration: const InputDecoration(
                 label: Text("Address"),
-                hintText: "Complete Address",
+                hintText: "Address",
                 filled: true,
                 fillColor: Color(0xFFF2F2F2),
               ),

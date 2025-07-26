@@ -1,196 +1,110 @@
-import 'package:capp/screens/user/booking.dart';
-import 'package:capp/utils/color.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:capp/screens/user/dasboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import 'package:capp/utils/color.dart';
 
-// ✅ Make sure to import the correct file where OrderConfirmationScreen is defined
- // <-- FIX THIS PATH
+class OrderConfirmationScreen extends StatelessWidget {
+  final String foodName;
+  final String total;
+  final DateTime selectedDate;
+  final String orderId;
 
-class BookingScreen extends StatefulWidget {
-  final Map<String, dynamic> itemData;
-
-  const BookingScreen({super.key, required this.itemData});
-
-  @override
-  State<BookingScreen> createState() => _BookingScreenState();
-}
-
-class _BookingScreenState extends State<BookingScreen> {
-  DateTime? selectedDate;
-  int itemPrice = 0;
-  int discount = 0;
-  int tax = 0;
-  int transport = 200;
-  int other = 100;
-  int total = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    calculateTotal();
-  }
-
-  void calculateTotal() {
-    final priceString = widget.itemData['price'] ?? 'Rs. 0';
-    final priceInt =
-        int.tryParse(priceString.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-
-    setState(() {
-      itemPrice = priceInt;
-      discount = (priceInt * 0.10).toInt();
-      tax = (priceInt * 0.05).toInt();
-      total = priceInt - discount + tax + transport + other;
-    });
-  }
-
-  Future<void> pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
-  Future<void> confirmBooking() async {
-    if (selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a date')),
-      );
-      return;
-    }
-
-    try {
-      DocumentReference docRef =
-          await FirebaseFirestore.instance.collection('orders').add({
-        'foodName': widget.itemData['foodName'],
-        'imageUrl': widget.itemData['imageUrl'],
-        'price': widget.itemData['price'],
-        'selectedDate': selectedDate!.toIso8601String(),
-        'total': 'Rs. $total',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      String orderId = docRef.id;
-
-      // ✅ Make sure this matches the constructor of OrderConfirmationScreen
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OrderConfirmationScreen(
-            foodName: widget.itemData['foodName'],
-            total: 'Rs. $total',
-            selectedDate: selectedDate!,
-            orderId: orderId,
-          ),
-        ),
-      );
-    } catch (e) {
-      print("❌ Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
-    }
-  }
+  const OrderConfirmationScreen({
+    super.key,
+    required this.foodName,
+    required this.total,
+    required this.selectedDate,
+    required this.orderId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.red,
       appBar: AppBar(
-        title: const Text('Booking Summary'),
+        automaticallyImplyLeading: false,
+
+        title: const Text("Order Confirmed"),
         backgroundColor: AppColors.red,
         centerTitle: true,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            summaryRow("Price", "Rs. $itemPrice"),
-            summaryRow("Discount (10%)", "- Rs. $discount"),
-            summaryRow("Tax (5%)", "+ Rs. $tax"),
-            summaryRow("Transport", "+ Rs. $transport"),
-            summaryRow("Other Charges", "+ Rs. $other"),
-            const Divider(thickness: 1),
-            summaryRow("Total", "Rs. $total", isBold: true),
-            SizedBox(height: 30.h),
-            Text("Select Event Date",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
-            SizedBox(height: 10.h),
-            InkWell(
-              onTap: pickDate,
-              child: Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 15.w, vertical: 14.h),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_month_outlined,
-                        color: Colors.grey[700]),
-                    SizedBox(width: 10.w),
-                    Text(
-                      selectedDate == null
-                          ? "Select a date"
-                          : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                      style: TextStyle(fontSize: 15.sp),
+      body: Center(
+        child: Container(
+          width: 0.9.sw,
+          padding: EdgeInsets.all(16.w),
+          margin: EdgeInsets.only(top: 30.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle_outline,
+                  color: Colors.green, size: 60.sp),
+              SizedBox(height: 10.h),
+              Text("Order Confirmed",
+                  style: TextStyle(
+                      fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              Divider(height: 30.h, color: Colors.grey.shade300),
+              orderDetailRow("Food Item", foodName),
+              SizedBox(height: 10.h),
+              orderDetailRow(
+                  "Date", DateFormat("dd/MM/yyyy").format(selectedDate)),
+              SizedBox(height: 10.h),
+              orderDetailRow("Total", total),
+              SizedBox(height: 30.h),
+              SizedBox(
+                width: double.infinity,
+                height: 48.h,
+                child: ElevatedButton(
+                 onPressed: (){
+                  Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => UserDashboard(userId: '')),
+);
+
+                 },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
-                    const Spacer(),
-                    const Icon(Icons.arrow_drop_down),
-                  ],
-                ),
-              ),
-            ),
-            const Spacer(),
-            SizedBox(height: 20.h),
-            SizedBox(
-              width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton(
-                onPressed: confirmBooking,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Text(
+                    "Back to Home",
+                    style: TextStyle(
+                        fontSize: 16.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
-                child: Text("Confirm",
-                    style: TextStyle(
-                        fontSize: 16.sp, fontWeight: FontWeight.bold)),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget summaryRow(String label, String value, {bool isBold = false}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-        ],
-      ),
+  Widget orderDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label,
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500)),
+        Text(value,
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600)),
+      ],
     );
   }
 }

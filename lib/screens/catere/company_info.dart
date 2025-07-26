@@ -33,12 +33,11 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
         const SnackBar(content: Text("Company info submitted")),
       );
 
-      // ✅ Redirect to Caterer Dashboard (as per your flow)
+      // ✅ Corrected: Pass actual userId to BottomNavigationCaterer
       Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (_) => BottomNavigationCaterer(userId: '',)),
-);
-
+        context,
+        MaterialPageRoute(builder: (_) => BottomNavigationCaterer(userId: uid)),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error submitting: $e")),
@@ -69,9 +68,11 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               color: AppColors.red,
-              child: const Text("Company Info",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: const Text(
+                "Company Info",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
             ),
             const SizedBox(height: 20),
             _buildField(_name, "Company Name"),
@@ -86,8 +87,10 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
                 minimumSize: const Size(double.infinity, 48),
               ),
               onPressed: _submit,
-              child: const Text("Submit",
-                  style: TextStyle(fontSize: 18, color: Colors.black)),
+              child: const Text(
+                "Submit",
+                style: TextStyle(fontSize: 18, color: Colors.black),
+              ),
             ),
           ],
         ),

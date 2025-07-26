@@ -1,7 +1,6 @@
 import 'package:capp/other%20screens/forgrtpassword.dart';
-import 'package:capp/screens/catere/booking.dart';
 import 'package:capp/screens/catere/bottom.dart';
-import 'package:capp/screens/catere/dashboard.dart';
+import 'package:capp/screens/catere/company_info.dart';
 import 'package:capp/screens/user/dasboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:capp/utils/color.dart';
@@ -24,8 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginUser() async {
     if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("All fields are required")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All fields are required")),
+      );
       return;
     }
 
@@ -42,19 +42,41 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       final userType = userDoc["userType"];
+
       if (userType == "caterer") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => BottomNavigationCaterer(userId:FirebaseAuth.instance.currentUser!.uid,)),
-        );
+        final companyInfoDoc = await _firestore
+            .collection("companyInfo")
+            .doc(userCred.user!.uid)
+            .get();
+
+        if (companyInfoDoc.exists) {
+          // Already filled company info, go to dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BottomNavigationCaterer(userId: userCred.user!.uid),
+            ),
+          );
+        } else {
+          // First-time login → fill company info
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const CompanyInfoScreen()),
+          );
+        }
       } else {
+        // Regular customer user
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => UserDashboard(userId: userCred.user!.uid)),
+          MaterialPageRoute(
+            builder: (_) => UserDashboard(userId: userCred.user!.uid),
+          ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login Failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login Failed: $e")),
+      );
     }
   }
 
@@ -67,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Login", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            Image.asset("assets/images/CuberLogo.png",height: 50,),
             const SizedBox(height: 30),
             TextField(
               controller: emailCtrl,
@@ -85,15 +107,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-
-            // ✅ Forget Password Text Button
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) =>  ForgetPasswordScreen()),
+                    MaterialPageRoute(builder: (_) => ForgetPasswordScreen()),
                   );
                 },
                 child: const Text(
@@ -102,12 +122,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
             ElevatedButton(
+              
               onPressed: _loginUser,
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
-              child: const Text("Login"),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.red,minimumSize: const Size(double.infinity, 50)),
+              child: const Text("Login",style: TextStyle(color: Colors.white,fontSize: 23,fontWeight:FontWeight.bold ),),
             ),
           ],
         ),

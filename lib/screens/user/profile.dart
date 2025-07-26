@@ -117,7 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundColor: AppColors.red,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
-                    child: const Text("Update Profile"),
+                    child: const Text("Update Profile",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
                   ),
                 ],
               ),

@@ -1,3 +1,5 @@
+import 'package:capp/screens/user/order_total.dart';
+import 'package:capp/utils/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,12 +18,19 @@ class _BookingScreenState extends State<BookingScreen> {
   DateTime? selectedDate;
   int quantity = 1;
 
+  final formatPKR = NumberFormat.currency(locale: 'ur_PK', symbol: 'Rs. ');
+
   int get pricePerUnit {
     String priceString = widget.itemData['price'].toString();
     return int.tryParse(priceString.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
   }
 
-  int get total => pricePerUnit * quantity;
+  int get discount => (pricePerUnit * 0.10).toInt();
+  int get transport => 150;
+  int get tax => (pricePerUnit * 0.05).toInt();
+  int get other => 90;
+
+  int get total => pricePerUnit - discount + tax + transport + other;
 
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -30,7 +39,6 @@ class _BookingScreenState extends State<BookingScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
@@ -46,178 +54,126 @@ class _BookingScreenState extends State<BookingScreen> {
       return;
     }
 
-    try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User not logged in')),
-        );
-        return;
-      }
-
-      /// ✅ Add order to Firestore WITH userId
-      final orderRef = await FirebaseFirestore.instance.collection('orders').add({
-        'foodName': widget.itemData['foodName'],
-        'imageUrl': widget.itemData['imageUrl'],
-        'price': widget.itemData['price'],
-        'selectedDate': selectedDate!.toIso8601String(),
-        'total': 'Rs. $total',
-        'catererId': widget.itemData['userId'], // Caterer UID
-        'userId': currentUser.uid, // ✅ Customer UID added here
-        'quantity': quantity,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      /// ✅ Print customer UID in console
-      print("✅ Order placed by UserID: ${currentUser.uid}");
-      print("Order ID: ${orderRef.id}");
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OrderConfirmationScreen(
-            foodName: widget.itemData['foodName'],
-            total: 'Rs. $total',
-            selectedDate: selectedDate!,
-            orderId: orderRef.id,
-          ),
-        ),
-      );
-    } catch (e) {
-      print('❌ Error placing order: $e');
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error placing order: $e')),
+        const SnackBar(content: Text('User not logged in')),
       );
+      return;
     }
+
+    final orderRef = await FirebaseFirestore.instance.collection('orders').add({
+      'foodName': widget.itemData['foodName'],
+      'imageUrl': widget.itemData['imageUrl'],
+      'price': widget.itemData['price'],
+      'selectedDate': selectedDate!.toIso8601String(),
+      'total': formatPKR.format(total),
+      'catererId': widget.itemData['userId'],
+      'userId': currentUser.uid,
+      'quantity': quantity,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OrderConfirmationScreen(
+          foodName: widget.itemData['foodName'],
+          total: formatPKR.format(total),
+          selectedDate: selectedDate!,
+          orderId: orderRef.id,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:Colors.white,
       appBar: AppBar(
-        title: const Text('Book Now'),
-        backgroundColor: Colors.red,
+        title: const Text("Booking"),
+        backgroundColor:AppColors.red,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Image.network(widget.itemData['imageUrl'], height: 200),
-            const SizedBox(height: 16),
-            Text(
-              widget.itemData['foodName'],
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors2.grey,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  rowText(widget.itemData['foodName'], formatPKR.format(pricePerUnit)),
+                  const SizedBox(height: 8),
+                  rowText("Discount", "10% (-${formatPKR.format(discount)})"),
+                  const SizedBox(height: 4),
+                  rowText("Transport Charges", formatPKR.format(transport)),
+                  const SizedBox(height: 4),
+                  rowText("Tax", "5% (+${formatPKR.format(tax)})"),
+                  const SizedBox(height: 4),
+                  rowText("Other Charges", formatPKR.format(other)),
+                  const Divider(height: 20),
+                  rowText("Total", formatPKR.format(total), isBold: true),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(widget.itemData['price'], style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Select Date:', style: TextStyle(fontSize: 16)),
-                TextButton(
-                  onPressed: _selectDate,
-                  child: Text(
-                    selectedDate == null
-                        ? 'Choose Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                  ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: _selectDate,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.red,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Quantity:', style: TextStyle(fontSize: 16)),
-                Row(
+                child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        if (quantity > 1) {
-                          setState(() => quantity--);
-                        }
-                      },
-                      icon: const Icon(Icons.remove),
+                    Expanded(
+                      child: Text(
+                        selectedDate == null
+                            ? "Select the Date"
+                            : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
-                    Text('$quantity', style: const TextStyle(fontSize: 18)),
-                    IconButton(
-                      onPressed: () => setState(() => quantity++),
-                      icon: const Icon(Icons.add),
-                    ),
+                    const Icon(Icons.arrow_drop_down, color: Colors.white),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text('Total: Rs. $total', style: const TextStyle(fontSize: 20)),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _confirmBooking,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
               ),
-              child: const Text('Confirm Booking', style: TextStyle(fontSize: 18)),
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _confirmBooking,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors2.grey,
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text(
+                  "Confirm",
+                  style: TextStyle(fontSize: 18, color: Colors.black),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class OrderConfirmationScreen extends StatelessWidget {
-  final String foodName;
-  final String total;
-  final DateTime selectedDate;
-  final String orderId;
-
-  const OrderConfirmationScreen({
-    super.key,
-    required this.foodName,
-    required this.total,
-    required this.selectedDate,
-    required this.orderId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Confirmed'),
-        backgroundColor: Colors.red,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 80),
-              const SizedBox(height: 16),
-              Text(
-                'Your order for "$foodName"\nhas been placed successfully!',
-                style: const TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Order Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 4),
-              Text('Total Amount: $total', style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 12),
-              Text('Order ID:\n$orderId',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center),
-            ],
-          ),
-        ),
-      ),
+  Widget rowText(String left, String right, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(left, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+        Text(right, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+      ],
     );
   }
 }

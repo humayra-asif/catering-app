@@ -1,5 +1,4 @@
 import 'package:capp/screens/user/booking.dart';
-import 'package:capp/screens/user/order_total.dart' hide BookingScreen;
 import 'package:capp/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,6 +19,7 @@ class ProductDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Product Detail"),
         backgroundColor: AppColors.red,
+       // automaticallyImplyLeading: false, // ✅ hides the back button
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),

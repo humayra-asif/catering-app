@@ -89,16 +89,17 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   void searchFilter(String query) {
-    final q = query.trim().toLowerCase();
-    setState(() {
-      filteredItems = q.isEmpty
-          ? allItems
-          : allItems.where((item) {
-              final name = (item['foodName'] ?? '').toString().toLowerCase();
-              return name.contains(q);
-            }).toList();
-    });
-  }
+  final q = query.trim().toLowerCase();
+  setState(() {
+    filteredItems = q.isEmpty
+        ? allItems
+        : allItems.where((item) {
+            final foodName = (item['foodName'] ?? '').toString().toLowerCase();
+            final catererName = (item['catererName'] ?? '').toString().toLowerCase();
+            return foodName.contains(q) || catererName.contains(q);
+          }).toList();
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +234,7 @@ class _UserDashboardState extends State<UserDashboard> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => ProductDetailScreen(itemData: item),
+                                  builder: (_) => ProductDetailScreen(itemData: item,),
                                 ),
                               );
                             },
