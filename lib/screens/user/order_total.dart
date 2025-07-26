@@ -1,9 +1,11 @@
 import 'package:capp/screens/user/booking.dart';
-import 'package:capp/screens/user/order_total.dart';
 import 'package:capp/utils/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+// ✅ Make sure to import the correct file where OrderConfirmationScreen is defined
+ // <-- FIX THIS PATH
 
 class BookingScreen extends StatefulWidget {
   final Map<String, dynamic> itemData;
@@ -31,7 +33,8 @@ class _BookingScreenState extends State<BookingScreen> {
 
   void calculateTotal() {
     final priceString = widget.itemData['price'] ?? 'Rs. 0';
-    final priceInt = int.tryParse(priceString.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    final priceInt =
+        int.tryParse(priceString.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
     setState(() {
       itemPrice = priceInt;
@@ -64,24 +67,38 @@ class _BookingScreenState extends State<BookingScreen> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('orders').add({
-      'foodName': widget.itemData['foodName'],
-      'imageUrl': widget.itemData['imageUrl'],
-      'price': widget.itemData['price'],
-      'selectedDate': selectedDate!.toIso8601String(),
-      'total': 'Rs. $total',
-    });
+    try {
+      DocumentReference docRef =
+          await FirebaseFirestore.instance.collection('orders').add({
+        'foodName': widget.itemData['foodName'],
+        'imageUrl': widget.itemData['imageUrl'],
+        'price': widget.itemData['price'],
+        'selectedDate': selectedDate!.toIso8601String(),
+        'total': 'Rs. $total',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => OrderConfirmationScreen(
-          foodName: widget.itemData['foodName'],
-          total: 'Rs. $total',
-          selectedDate: selectedDate!, itemData: {},
+      String orderId = docRef.id;
+
+      // ✅ Make sure this matches the constructor of OrderConfirmationScreen
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OrderConfirmationScreen(
+            foodName: widget.itemData['foodName'],
+            total: 'Rs. $total',
+            selectedDate: selectedDate!,
+            orderId: orderId,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      print("❌ Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
   }
 
   @override
@@ -105,21 +122,22 @@ class _BookingScreenState extends State<BookingScreen> {
             const Divider(thickness: 1),
             summaryRow("Total", "Rs. $total", isBold: true),
             SizedBox(height: 30.h),
-
-            Text("Select Event Date", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+            Text("Select Event Date",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
             SizedBox(height: 10.h),
-
             InkWell(
               onTap: pickDate,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 14.h),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 15.w, vertical: 14.h),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_month_outlined, color: Colors.grey[700]),
+                    Icon(Icons.calendar_month_outlined,
+                        color: Colors.grey[700]),
                     SizedBox(width: 10.w),
                     Text(
                       selectedDate == null
@@ -133,11 +151,8 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
               ),
             ),
-
             const Spacer(),
-
             SizedBox(height: 20.h),
-
             SizedBox(
               width: double.infinity,
               height: 50.h,
@@ -149,7 +164,9 @@ class _BookingScreenState extends State<BookingScreen> {
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                 ),
-                child: Text("Confirm", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                child: Text("Confirm",
+                    style: TextStyle(
+                        fontSize: 16.sp, fontWeight: FontWeight.bold)),
               ),
             )
           ],
@@ -164,8 +181,14 @@ class _BookingScreenState extends State<BookingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-          Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
         ],
       ),
     );

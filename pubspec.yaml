@@ -39,7 +39,10 @@ dependencies:
   cloud_firestore: ^4.17.0
   flutter_screenutil: ^5.9.0
   smooth_page_indicator: ^1.1.0
-
+  image_picker: ^1.0.4
+  permission_handler: ^11.1.0
+  firebase_storage: ^11.7.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

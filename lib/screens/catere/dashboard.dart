@@ -1,78 +1,88 @@
+import 'package:capp/other%20screens/login.dart';
+import 'package:capp/screens/catere/additem.dart';
+import 'package:capp/screens/catere/bottom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:capp/utils/color.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
-class CatererDashboardScreen extends StatefulWidget {
+class CatererDashboard extends StatelessWidget {
   final String userId;
 
-  const CatererDashboardScreen({super.key, required this.userId});
+  const CatererDashboard({super.key, required this.userId});
 
-  @override
-  State<CatererDashboardScreen> createState() => _CatererDashboardScreenState();
-}
+  Future<List<Map<String, dynamic>>> getMyItems() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection("catererItems")
+        .where("userId", isEqualTo: userId)
+        .get();
 
-class _CatererDashboardScreenState extends State<CatererDashboardScreen> {
-  String catererName = '';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchCatererName();
-  }
-
-  void fetchCatererName() async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(widget.userId).get();
-    setState(() {
-      catererName = doc['name'] ?? 'Caterer';
-    });
+    return snapshot.docs.map((doc) => doc.data()).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome, $catererName!'),
-        backgroundColor: Colors.red,
+        title: const Text("Caterer Dashboard"),
+        backgroundColor: AppColors.red,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+          )
+        ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('catererItems').limit(8).snapshots(),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: getMyItems(),
         builder: (context, snapshot) {
-          ///if (snapshot.hasError) return const Center(child: Text('Error loading items'));
-          ///if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          final items = snapshot.data!.docs;
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(10),
+          final items = snapshot.data ?? [];
+
+          if (items.isEmpty) {
+            return const Center(child: Text("No items found"));
+          }
+
+          return ListView.builder(
             itemCount: items.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.8,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.red),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Image.network(item['imageUrl'], fit: BoxFit.cover),
-                    ),
-                    Text(item['catererName'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(item['foodName']),
-                    Text('Rs. ${item['price']}'),
-                  ],
+            itemBuilder: (_, i) {
+              final item = items[i];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  title: Text(item['foodName'] ?? ''),
+                  subtitle: Text(item['price'] ?? ''),
+                  trailing: Text(item['description'] ?? ''),
                 ),
               );
             },
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.red,
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddItemPage()),
+          );
+        },
+      ),
+     /// bottomNavigationBar: BottomNavigationCaterer(userId: userId),
     );
   }
 }

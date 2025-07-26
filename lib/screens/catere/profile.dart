@@ -1,92 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CatererProfileScreen extends StatefulWidget {
+  final String userId;
+  const CatererProfileScreen({required this.userId});
+
   @override
   State<CatererProfileScreen> createState() => _CatererProfileScreenState();
 }
 
 class _CatererProfileScreenState extends State<CatererProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final nameCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final addressCtrl = TextEditingController();
+  String companyName = '';
+  String email = '';
 
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
+  Future<void> loadProfile() async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.userId).get();
+      final companyDoc = await FirebaseFirestore.instance.collection('company').doc(widget.userId).get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        nameCtrl.text = data['name'] ?? '';
+        phoneCtrl.text = data['phone'] ?? '';
+        addressCtrl.text = data['address'] ?? '';
+        email = data['email'] ?? '';
+      }
+
+      if (companyDoc.exists) {
+        companyName = companyDoc.data()!['companyName'] ?? '';
+      }
+      setState(() {});
+    } catch (e) {
+      print("Profile load error: $e");
+    }
+  }
+
+  Future<void> saveProfile() async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(widget.userId).update({
+        'name': nameCtrl.text,
+        'phone': phoneCtrl.text,
+        'address': addressCtrl.text,
+      });
+      print("Profile updated!");
+    } catch (e) {
+      print("Profile update error: $e");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchProfileData();
-  }
-
-  void fetchProfileData() async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    setState(() {
-      nameController.text = doc['name'] ?? '';
-      emailController.text = doc['email'] ?? '';
-      phoneController.text = doc['phone'] ?? '';
-      addressController.text = doc['address'] ?? '';
-    });
-  }
-
-  void saveProfile() async {
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'name': nameController.text.trim(),
-      'phone': phoneController.text.trim(),
-      'address': addressController.text.trim(),
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated')));
-  }
-
-  void logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login'); // Change route accordingly
+    loadProfile();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Caterer Profile'), backgroundColor: Colors.red),
+      appBar: AppBar(title: const Text("Edit Profile")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              buildTextField('Name', nameController),
-              buildTextField('Email (Read Only)', emailController, readOnly: true),
-              buildTextField('Phone', phoneController),
-              buildTextField('Address', addressController),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: saveProfile,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text('Save Profile'),
-              ),
-              TextButton(
-                onPressed: logout,
-                child: Text('Logout', style: TextStyle(color: Colors.red)),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildTextField(String label, TextEditingController controller, {bool readOnly = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        readOnly: readOnly,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Name")),
+            TextField(controller: phoneCtrl, decoration: const InputDecoration(labelText: "Phone")),
+            TextField(controller: addressCtrl, decoration: const InputDecoration(labelText: "Address")),
+            const SizedBox(height: 12),
+            Text("Company Name: $companyName", style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text("Email: $email", style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            ElevatedButton(onPressed: saveProfile, child: const Text("Save"))
+          ],
         ),
       ),
     );

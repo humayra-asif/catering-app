@@ -1,43 +1,46 @@
+import 'package:capp/screens/catere/additem.dart';
+import 'package:capp/screens/catere/booking.dart';
 import 'package:capp/screens/catere/dashboard.dart';
-import 'package:capp/screens/catere/profile.dart';
+import 'package:capp/screens/catere/profile.dart';// ✅ Import your booking screen
+import 'package:capp/utils/color.dart';
 import 'package:flutter/material.dart';
 
-
 class BottomNavigationCaterer extends StatefulWidget {
+  final String userId;
+
+  const BottomNavigationCaterer({super.key, required this.userId});
+
   @override
-  _BottomNavigationCatererState createState() => _BottomNavigationCatererState();
+  State<BottomNavigationCaterer> createState() => _BottomNavigationCatererState();
 }
 
 class _BottomNavigationCatererState extends State<BottomNavigationCaterer> {
-  int currentIndex = 0;
-
-  final List<Widget> screens = [
-    ///CatererDashboardScreen()
-    CatererDashboardScreen(userId: '',),
-    //CatererOrdersScreen(),
-    ////CatererAddItemScreen(),
-   // CatererMessagesScreen(),
-    CatererProfileScreen(),
-  ];
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Booking tab me CatererBookingScreen diya gaya hai
+    final screens = [
+      CatererDashboard(userId: widget.userId,),
+      CatererBookingScreen(catererId: widget.userId), // 👈 Your Booking Screen
+      AddItemPage(),
+      CatererProfileScreen(userId: widget.userId),
+    ];
+
     return Scaffold(
-      body: screens[currentIndex],
+      body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        selectedItemColor: Colors.red, // use myapp.red if needed
-        unselectedItemColor: Colors.grey,
+        currentIndex: _currentIndex,
+        selectedItemColor: AppColors.red,
+        unselectedItemColor: Colors.black,
+        backgroundColor: Colors.grey[200],
         onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
+          setState(() => _currentIndex = index);
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Orders'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Booking'),
           BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

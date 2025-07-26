@@ -1,5 +1,5 @@
 import 'package:capp/screens/user/booking.dart';
-import 'package:capp/screens/user/order_total.dart';
+import 'package:capp/screens/user/order_total.dart' hide BookingScreen;
 import 'package:capp/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,6 +44,8 @@ class ProductDetailScreen extends StatelessWidget {
             Text(itemData['foodName'] ?? '',
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
             SizedBox(height: 6.h),
+            Text(itemData['catererName'] ?? '',
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500)),
             Text(itemData['price'] ?? '',
                 style: TextStyle(fontSize: 14.sp, color: Colors.black54)),
             SizedBox(height: 12.h),
@@ -70,7 +72,7 @@ class ProductDetailScreen extends StatelessWidget {
                   backgroundColor: AppColors.red,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 ),
-                child: Text("Book Now", style: TextStyle(fontSize: 16.sp,color: Colors.white)),
+                child: Text("Book Now", style: TextStyle(fontSize: 16.sp, color: Colors.white)),
               ),
             )
           ],

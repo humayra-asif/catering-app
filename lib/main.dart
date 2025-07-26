@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       builder: (_, __) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Cuber',
-        home: const SplashScreen(),
+        home: SplashScreen(),
       ),
     );
   }

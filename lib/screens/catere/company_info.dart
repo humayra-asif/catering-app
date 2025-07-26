@@ -1,3 +1,4 @@
+import 'package:capp/screens/catere/bottom.dart';
 import 'package:capp/screens/catere/dashboard.dart';
 import 'package:capp/utils/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,9 +35,10 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
 
       // ✅ Redirect to Caterer Dashboard (as per your flow)
       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => CatererDashboardScreen(userId: '',)),
-      );
+  context,
+  MaterialPageRoute(builder: (_) => BottomNavigationCaterer(userId: '',)),
+);
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error submitting: $e")),
