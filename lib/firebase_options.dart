@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCfyN34RJhIYsHdFWr6T_w_sDN-m4vQ880',
-    appId: '1:503578641265:web:9325b33c6c404a60a52cd0',
-    messagingSenderId: '503578641265',
-    projectId: 'catering-app-7d6e7',
-    authDomain: 'catering-app-7d6e7.firebaseapp.com',
-    storageBucket: 'catering-app-7d6e7.firebasestorage.app',
-    measurementId: 'G-B8BMMN62Q5',
+    apiKey: 'AIzaSyBzz3S8dNBfNqBwxjU_JPcge55uGNGHboQ',
+    appId: '1:223116581652:web:161e75bee0b2a8166c8001',
+    messagingSenderId: '223116581652',
+    projectId: 'cuberapp-b9e9a',
+    authDomain: 'cuberapp-b9e9a.firebaseapp.com',
+    storageBucket: 'cuberapp-b9e9a.firebasestorage.app',
+    measurementId: 'G-P1BN9Y9G99',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDafbxx8GRSUQgZYOSSgkK0h5FjChzqzpw',
-    appId: '1:503578641265:android:cea1847879c982c1a52cd0',
-    messagingSenderId: '503578641265',
-    projectId: 'catering-app-7d6e7',
-    storageBucket: 'catering-app-7d6e7.firebasestorage.app',
+    apiKey: 'AIzaSyCyjW6WgJg8cXsr961rudQzMNzQyOvJMEQ',
+    appId: '1:223116581652:android:48d65bf744f2aeab6c8001',
+    messagingSenderId: '223116581652',
+    projectId: 'cuberapp-b9e9a',
+    storageBucket: 'cuberapp-b9e9a.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBVg7SGYdSbraNwOanrAxUjIOF0cg3_I-Q',
-    appId: '1:503578641265:ios:241e6c743a44a591a52cd0',
-    messagingSenderId: '503578641265',
-    projectId: 'catering-app-7d6e7',
-    storageBucket: 'catering-app-7d6e7.firebasestorage.app',
+    apiKey: 'AIzaSyBiA635VwXgkFZyDwoWmhddo-WS_z8uiOs',
+    appId: '1:223116581652:ios:9f16c29ecb7a3eae6c8001',
+    messagingSenderId: '223116581652',
+    projectId: 'cuberapp-b9e9a',
+    storageBucket: 'cuberapp-b9e9a.firebasestorage.app',
     iosBundleId: 'com.example.capp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBVg7SGYdSbraNwOanrAxUjIOF0cg3_I-Q',
-    appId: '1:503578641265:ios:241e6c743a44a591a52cd0',
-    messagingSenderId: '503578641265',
-    projectId: 'catering-app-7d6e7',
-    storageBucket: 'catering-app-7d6e7.firebasestorage.app',
+    apiKey: 'AIzaSyBiA635VwXgkFZyDwoWmhddo-WS_z8uiOs',
+    appId: '1:223116581652:ios:9f16c29ecb7a3eae6c8001',
+    messagingSenderId: '223116581652',
+    projectId: 'cuberapp-b9e9a',
+    storageBucket: 'cuberapp-b9e9a.firebasestorage.app',
     iosBundleId: 'com.example.capp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCfyN34RJhIYsHdFWr6T_w_sDN-m4vQ880',
-    appId: '1:503578641265:web:ea12547dd550e0e5a52cd0',
-    messagingSenderId: '503578641265',
-    projectId: 'catering-app-7d6e7',
-    authDomain: 'catering-app-7d6e7.firebaseapp.com',
-    storageBucket: 'catering-app-7d6e7.firebasestorage.app',
-    measurementId: 'G-C5KG52PNEC',
+    apiKey: 'AIzaSyBzz3S8dNBfNqBwxjU_JPcge55uGNGHboQ',
+    appId: '1:223116581652:web:ac3c23c202709d2f6c8001',
+    messagingSenderId: '223116581652',
+    projectId: 'cuberapp-b9e9a',
+    authDomain: 'cuberapp-b9e9a.firebaseapp.com',
+    storageBucket: 'cuberapp-b9e9a.firebasestorage.app',
+    measurementId: 'G-KY2GNEEPWC',
   );
+
 }

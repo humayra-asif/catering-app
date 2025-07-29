@@ -105,6 +105,8 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+                automaticallyImplyLeading:false ,
+
         backgroundColor: AppColors.red,
         elevation: 0,
         title: Image.asset('assets/images/CuberLogo.png', height: 40),

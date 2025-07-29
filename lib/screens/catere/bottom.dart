@@ -33,7 +33,7 @@ class _BottomNavigationCatererState extends State<BottomNavigationCaterer> {
         currentIndex: _currentIndex,
         selectedItemColor: AppColors.red,
         unselectedItemColor: Colors.black,
-        backgroundColor: Colors.grey[200],
+        backgroundColor: AppColors2.grey,
         onTap: (index) {
           setState(() => _currentIndex = index);
         },
