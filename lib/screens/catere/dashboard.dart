@@ -52,9 +52,8 @@ class _CatererDashboardState extends State<CatererDashboard> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-                title: Image.asset('assets/images/CuberLogo.png', height: 40),
-
-                backgroundColor: Colors.white,
+        title: Image.asset('assets/images/CuberLogo.png', height: 40),
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
         actions: [
@@ -69,11 +68,14 @@ class _CatererDashboardState extends State<CatererDashboard> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor:AppColors2.grey,
+                backgroundColor: AppColors2.grey,
                 foregroundColor: Colors.black,
                 elevation: 0,
               ),
-              child: const Text("Logout",style: TextStyle(fontWeight: FontWeight.bold),),
+              child: const Text(
+                "Logout",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -148,8 +150,7 @@ class _CatererDashboardState extends State<CatererDashboard> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              item['image'] ??
-                                  'https://via.placeholder.com/70',
+                              item['imageUrl'] ?? 'https://via.placeholder.com/70',
                               height: 70,
                               width: 70,
                               fit: BoxFit.cover,

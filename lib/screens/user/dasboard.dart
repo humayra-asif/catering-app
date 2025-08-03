@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:capp/other%20screens/login.dart';
 import 'package:capp/screens/user/productdetail.dart';
 import 'package:capp/screens/user/profile.dart';
 import 'package:capp/utils/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // ✅ for logout
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -89,28 +91,42 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   void searchFilter(String query) {
-  final q = query.trim().toLowerCase();
-  setState(() {
-    filteredItems = q.isEmpty
-        ? allItems
-        : allItems.where((item) {
-            final foodName = (item['foodName'] ?? '').toString().toLowerCase();
-            final catererName = (item['catererName'] ?? '').toString().toLowerCase();
-            return foodName.contains(q) || catererName.contains(q);
-          }).toList();
-  });
-}
+    final q = query.trim().toLowerCase();
+    setState(() {
+      filteredItems = q.isEmpty
+          ? allItems
+          : allItems.where((item) {
+              final foodName = (item['foodName'] ?? '').toString().toLowerCase();
+              final catererName = (item['catererName'] ?? '').toString().toLowerCase();
+              return foodName.contains(q) || catererName.contains(q);
+            }).toList();
+    });
+  }
+
+  void logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen()), // ✅ your login screen
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-                automaticallyImplyLeading:false ,
-
+        automaticallyImplyLeading: false,
         backgroundColor: AppColors.red,
         elevation: 0,
         title: Image.asset('assets/images/CuberLogo.png', height: 40),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: logout,
+            tooltip: 'Logout',
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -236,7 +252,7 @@ class _UserDashboardState extends State<UserDashboard> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => ProductDetailScreen(itemData: item,),
+                                  builder: (_) => ProductDetailScreen(itemData: item),
                                 ),
                               );
                             },

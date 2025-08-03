@@ -1,3 +1,4 @@
+import 'package:capp/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -28,8 +29,9 @@ class _CatererProfileScreenState extends State<CatererProfileScreen> {
           .collection('users')
           .doc(widget.userId)
           .get();
+
       final companyDoc = await FirebaseFirestore.instance
-          .collection('company')
+          .collection('companyInfo') // ✅ Corrected collection name
           .doc(widget.userId)
           .get();
 
@@ -61,9 +63,26 @@ class _CatererProfileScreenState extends State<CatererProfileScreen> {
         'phone': phoneCtrl.text,
         'address': addressCtrl.text,
       });
-      print("Profile updated!");
+
+      // ✅ Show snackbar after successful update
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Profile updated successfully!'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } catch (e) {
       print("Profile update error: $e");
+
+      // ❌ Show error snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update profile. Please try again.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -103,16 +122,17 @@ class _CatererProfileScreenState extends State<CatererProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Edit Profile")),
+      appBar: AppBar(
+        backgroundColor: AppColors.red,
+        automaticallyImplyLeading: false,
+        title: Text("Edit Profile"),
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: ListView(
           children: [
             Center(
-              child: Text(
-                "Cuber",
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
+              child: Image.asset('assets/images/CuberLogo.png', height: 60),
             ),
             SizedBox(height: 30),
             customTextField(label: "Name", controller: nameCtrl),
@@ -141,7 +161,8 @@ class _CatererProfileScreenState extends State<CatererProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text("Save", style: TextStyle(fontSize: 18)),
+                child: Text("Save",
+                    style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
           ],

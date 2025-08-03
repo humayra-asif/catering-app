@@ -38,10 +38,10 @@ class _BottomNavigationCatererState extends State<BottomNavigationCaterer> {
           setState(() => _currentIndex = index);
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Booking'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.wallet_travel_outlined), label: 'Booking'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_business_outlined), label: 'Add'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_pin_outlined), label: 'Profile'),
         ],
       ),
     );

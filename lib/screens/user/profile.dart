@@ -75,7 +75,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Image.asset("assets/images/CuberLogo.png", height: 100),
+                  Image.asset("assets/images/CuberLogo.png", height: 50),
                   const SizedBox(height: 20),
                   TextField(
                     controller: nameController,
