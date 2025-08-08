@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
 class CatererBookingScreen extends StatefulWidget {
   final String catererId;
 
@@ -62,16 +61,25 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
     }
   }
 
-  String formatDate(String isoString) {
+  String formatDate(dynamic dateValue) {
     try {
-      final date = DateTime.parse(isoString);
-      final formatted = DateFormat('dd-MMM-yyyy').format(date); // e.g., 12-Aug-2025
+      DateTime date;
+
+      if (dateValue is Timestamp) {
+        date = dateValue.toDate(); // Convert Firestore timestamp
+      } else if (dateValue is String) {
+        date = DateTime.parse(dateValue); // Convert String to DateTime
+      } else {
+        return "Invalid date";
+      }
+
+      final formatted = DateFormat('dd-MMM-yyyy').format(date);
       final parts = formatted.split('-');
       if (parts.length == 3) {
         final day = parts[0];
         final month = parts[1].toLowerCase();
         final year = parts[2];
-        return '$day- $month-$year'; // "12- oct-2025"
+        return '$day- $month-$year';
       }
       return formatted;
     } catch (e) {
@@ -83,8 +91,7 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-                automaticallyImplyLeading: false,
-
+        automaticallyImplyLeading: false,
         title: const Text("Bookings"),
         backgroundColor: AppColors.red,
         elevation: 0,
@@ -100,9 +107,10 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final booking = bookings[index];
-                    final customerName = booking['customerName'] ?? 'Customer Name';
+                    final customerName =
+                        booking['customerName'] ?? 'Customer Name';
                     final foodName = booking['foodName'] ?? '';
-                    final rawDate = booking['selectedDate'] ?? '';
+                    final rawDate = booking['selectedDate'];
                     final formattedDate = formatDate(rawDate);
                     final price = booking['price']?.toString() ?? '';
                     final total = booking['total']?.toString() ?? '';
@@ -150,7 +158,7 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
-                                          'Total: ${total}',
+                                          'Total: $total',
                                           style: const TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:capp/other%20screens/login.dart';
+import 'package:capp/screens/user/orders.dart';
 import 'package:capp/screens/user/productdetail.dart';
 import 'package:capp/screens/user/profile.dart';
 import 'package:capp/utils/color.dart';
@@ -53,7 +54,9 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   Future<void> fetchBannerImages() async {
-    final snapshot = await FirebaseFirestore.instance.collection('banners').get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('banners')
+        .get();
     final list = <String>[];
     for (var doc in snapshot.docs) {
       final data = doc.data();
@@ -67,7 +70,10 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   Future<void> fetchCatererItems() async {
-    final snapshot = await FirebaseFirestore.instance.collection('catererItems').limit(8).get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('catererItems')
+        .limit(8)
+        .get();
     final list = <Map<String, dynamic>>[];
 
     for (final doc in snapshot.docs) {
@@ -75,7 +81,10 @@ class _UserDashboardState extends State<UserDashboard> {
       data['docId'] = doc.id;
 
       if (data['userId'] != null) {
-        final userDoc = await FirebaseFirestore.instance.collection('users').doc(data['userId']).get();
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(data['userId'])
+            .get();
         data['catererName'] = userDoc.data()?['name'] ?? 'Unknown';
       } else {
         data['catererName'] = 'Unknown';
@@ -96,8 +105,12 @@ class _UserDashboardState extends State<UserDashboard> {
       filteredItems = q.isEmpty
           ? allItems
           : allItems.where((item) {
-              final foodName = (item['foodName'] ?? '').toString().toLowerCase();
-              final catererName = (item['catererName'] ?? '').toString().toLowerCase();
+              final foodName = (item['foodName'] ?? '')
+                  .toString()
+                  .toLowerCase();
+              final catererName = (item['catererName'] ?? '')
+                  .toString()
+                  .toLowerCase();
               return foodName.contains(q) || catererName.contains(q);
             }).toList();
     });
@@ -148,7 +161,10 @@ class _UserDashboardState extends State<UserDashboard> {
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
                         child: Row(
                           children: [
-                            const Icon(Icons.manage_search_outlined, color: Colors.black54),
+                            const Icon(
+                              Icons.manage_search_outlined,
+                              color: Colors.black54,
+                            ),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: TextField(
@@ -170,14 +186,39 @@ class _UserDashboardState extends State<UserDashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => EditProfileScreen(userId: widget.userId),
+                            builder: (_) =>
+                                EditProfileScreen(userId: widget.userId),
                           ),
                         );
                       },
                       child: CircleAvatar(
                         radius: 20.r,
                         backgroundColor: AppColors2.grey,
-                        child: const Icon(Icons.person, color: Colors.black, size: 30),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.black,
+                          size: 25,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CustomerOrdersScreen(),
+                          ),
+                        );
+                      },
+                      child: CircleAvatar(
+                        radius: 20.r,
+                        backgroundColor: AppColors2.grey,
+                        child: const Icon(
+                          Icons.favorite,
+                          color: Colors.black,
+                          size: 25,
+                        ),
                       ),
                     ),
                   ],
@@ -188,46 +229,59 @@ class _UserDashboardState extends State<UserDashboard> {
                 bannerImages.isEmpty
                     ? SizedBox(
                         height: 200.h,
-                        child: const Center(child: Text("No banners found")))
-                    : Column(children: [
-                        SizedBox(
-                          height: 200.h,
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemCount: bannerImages.length,
-                            onPageChanged: (i) => setState(() => _currentPage = i),
-                            itemBuilder: (_, i) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(10.r),
-                                child: Image.network(
-                                  bannerImages[i],
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    color: AppColors.red,
-                                    alignment: Alignment.center,
-                                    child: const Icon(Icons.broken_image, color: Colors.white),
+                        child: const Center(child: Text("No banners found")),
+                      )
+                    : Column(
+                        children: [
+                          SizedBox(
+                            height: 200.h,
+                            child: PageView.builder(
+                              controller: _pageController,
+                              itemCount: bannerImages.length,
+                              onPageChanged: (i) =>
+                                  setState(() => _currentPage = i),
+                              itemBuilder: (_, i) {
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                  child: Image.network(
+                                    bannerImages[i],
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: AppColors.red,
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 10.h),
-                        SmoothPageIndicator(
-                          controller: _pageController,
-                          count: bannerImages.length,
-                          effect: ExpandingDotsEffect(
-                            dotWidth: 10,
-                            dotHeight: 10,
-                            activeDotColor: AppColors.red,
+                          SizedBox(height: 10.h),
+                          SmoothPageIndicator(
+                            controller: _pageController,
+                            count: bannerImages.length,
+                            effect: ExpandingDotsEffect(
+                              dotWidth: 10,
+                              dotHeight: 10,
+                              activeDotColor: AppColors.red,
+                            ),
                           ),
-                        ),
-                      ]),
+                        ],
+                      ),
                 SizedBox(height: 30.h),
 
                 Row(
                   children: [
-                    Text("Popular Items", style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                    Text(
+                      "Popular Items",
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const Spacer(),
                   ],
                 ),
@@ -252,7 +306,8 @@ class _UserDashboardState extends State<UserDashboard> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => ProductDetailScreen(itemData: item),
+                                  builder: (_) =>
+                                      ProductDetailScreen(itemData: item),
                                 ),
                               );
                             },
@@ -275,15 +330,37 @@ class _UserDashboardState extends State<UserDashboard> {
                                         errorBuilder: (_, __, ___) => Container(
                                           color: Colors.black26,
                                           alignment: Alignment.center,
-                                          child: const Icon(Icons.broken_image, color: Colors.white),
+                                          child: const Icon(
+                                            Icons.broken_image,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                   SizedBox(height: 6.h),
-                                  Text(item['foodName'] ?? '', style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                                  Text(item['catererName'] ?? '', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
-                                  Text(item['price'] ?? '', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                                  Text(
+                                    item['foodName'] ?? '',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    item['catererName'] ?? '',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
+                                  Text(
+                                    item['price'] ?? '',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
