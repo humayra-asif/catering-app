@@ -3,6 +3,7 @@ import 'package:capp/utils/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -27,6 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _signup() async {
     try {
+      // Basic field validation
       if (_email.text.isEmpty ||
           _password.text.isEmpty ||
           _name.text.isEmpty ||
@@ -39,11 +41,27 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
+      // Extra validations
+      if (!_email.text.contains("@")) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter a valid email address")),
+        );
+        return;
+      }
+      if (_password.text.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Password must be at least 6 characters")),
+        );
+        return;
+      }
+
+      // Firebase Authentication signup
       final userCred = await _auth.createUserWithEmailAndPassword(
         email: _email.text.trim(),
         password: _password.text.trim(),
       );
 
+      // Store user data in Firestore
       await _firestore.collection("users").doc(userCred.user!.uid).set({
         "email": _email.text.trim(),
         "name": _name.text.trim(),
@@ -62,10 +80,28 @@ class _SignupScreenState extends State<SignupScreen> {
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
+    } on FirebaseAuthException catch (e) {
+      // Specific Firebase errors
+      String message = "";
+      if (e.code == 'email-already-in-use') {
+        message = "This email is already registered.";
+      } else if (e.code == 'invalid-email') {
+        message = "The email address is not valid.";
+      } else if (e.code == 'weak-password') {
+        message = "Password is too weak. Use at least 6 characters.";
+      } else {
+        message = e.message ?? "Signup failed.";
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+      print("Signup error: ${e.code} - ${e.message}");
     } catch (e) {
+      // Any other error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Signup failed: $e")),
       );
+      print("Unexpected signup error: $e");
     }
   }
 
@@ -84,6 +120,9 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 30),
             TextField(
               controller: _name,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+              ],
               decoration: const InputDecoration(
                 label: Text("Full Name"),
                 hintText: "Ali Khan",
@@ -124,9 +163,14 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _cnic,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(13),
+              ],
               decoration: const InputDecoration(
                 label: Text("CNIC"),
-                hintText: "42101-1234567-8",
+                hintText: "4210112345678",
                 filled: true,
                 fillColor: Color(0xFFF2F2F2),
               ),
@@ -167,7 +211,10 @@ class _SignupScreenState extends State<SignupScreen> {
                 minimumSize: const Size(double.infinity, 48),
               ),
               onPressed: _signup,
-              child: const Text("Signup", style: TextStyle(fontSize: 18,color: Colors.black)),
+              child: const Text(
+                "Signup",
+                style: TextStyle(fontSize: 18, color: Colors.black),
+              ),
             ),
             const SizedBox(height: 20),
             TextButton(
@@ -177,7 +224,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
                 );
               },
-              child: const Text("Already have an account? Login",style: TextStyle(color: Colors.black),),
+              child: const Text(
+                "Already have an account? Login",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         ),

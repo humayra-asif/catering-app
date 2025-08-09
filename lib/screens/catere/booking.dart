@@ -64,24 +64,14 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
   String formatDate(dynamic dateValue) {
     try {
       DateTime date;
-
       if (dateValue is Timestamp) {
-        date = dateValue.toDate(); // Convert Firestore timestamp
+        date = dateValue.toDate();
       } else if (dateValue is String) {
-        date = DateTime.parse(dateValue); // Convert String to DateTime
+        date = DateTime.parse(dateValue);
       } else {
         return "Invalid date";
       }
-
-      final formatted = DateFormat('dd-MMM-yyyy').format(date);
-      final parts = formatted.split('-');
-      if (parts.length == 3) {
-        final day = parts[0];
-        final month = parts[1].toLowerCase();
-        final year = parts[2];
-        return '$day- $month-$year';
-      }
-      return formatted;
+      return DateFormat('dd-MMM-yyyy').format(date);
     } catch (e) {
       return "Invalid date";
     }
@@ -114,6 +104,9 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
                     final formattedDate = formatDate(rawDate);
                     final price = booking['price']?.toString() ?? '';
                     final total = booking['total']?.toString() ?? '';
+                    final isCancelled = booking['cancel'] == true;
+                    final cancelReason =
+                        booking['cancelReason'] ?? 'Order has been canceled by customer';
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -124,7 +117,6 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
                         ),
                         child: Row(
                           children: [
-                            // content
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -140,21 +132,18 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      '1 $foodName',
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
+                                    Text('1 $foodName',
+                                        style: const TextStyle(fontSize: 12)),
                                     const SizedBox(height: 2),
-                                    Text(
-                                      'date: $formattedDate',
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
+                                    Text('date: $formattedDate',
+                                        style: const TextStyle(fontSize: 12)),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
                                         Text(
                                           'Price: ${price.startsWith("Rs") ? price : "Rs. $price"}',
-                                          style: const TextStyle(fontSize: 12),
+                                          style:
+                                              const TextStyle(fontSize: 12),
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
@@ -166,18 +155,30 @@ class _CatererBookingScreenState extends State<CatererBookingScreen> {
                                         ),
                                       ],
                                     ),
+                                    if (isCancelled) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        cancelReason,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
                             ),
-                            // red indicator bar
                             Container(
                               width: 14,
                               height: 100,
                               margin: const EdgeInsets.only(right: 4),
-                              decoration: const BoxDecoration(
-                                color: AppColors.red,
-                                borderRadius: BorderRadius.only(
+                              decoration: BoxDecoration(
+                                color: isCancelled
+                                    ? Colors.red
+                                    : AppColors.red,
+                                borderRadius: const BorderRadius.only(
                                   topRight: Radius.circular(10),
                                   bottomRight: Radius.circular(10),
                                 ),

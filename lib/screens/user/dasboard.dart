@@ -5,7 +5,7 @@ import 'package:capp/screens/user/productdetail.dart';
 import 'package:capp/screens/user/profile.dart';
 import 'package:capp/utils/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // ✅ for logout
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -54,9 +54,7 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   Future<void> fetchBannerImages() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('banners')
-        .get();
+    final snapshot = await FirebaseFirestore.instance.collection('banners').get();
     final list = <String>[];
     for (var doc in snapshot.docs) {
       final data = doc.data();
@@ -105,22 +103,59 @@ class _UserDashboardState extends State<UserDashboard> {
       filteredItems = q.isEmpty
           ? allItems
           : allItems.where((item) {
-              final foodName = (item['foodName'] ?? '')
-                  .toString()
-                  .toLowerCase();
-              final catererName = (item['catererName'] ?? '')
-                  .toString()
-                  .toLowerCase();
+              final foodName =
+                  (item['foodName'] ?? '').toString().toLowerCase();
+              final catererName =
+                  (item['catererName'] ?? '').toString().toLowerCase();
               return foodName.contains(q) || catererName.contains(q);
             }).toList();
     });
   }
 
-  void logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()), // ✅ your login screen
+  void showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: const Text(
+          "Are you sure to logout?",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: AppColors2.grey, // gray button
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text("No",style: TextStyle(color: Colors.black),),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: AppColors.red, // red button
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text("Yes"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -135,8 +170,8 @@ class _UserDashboardState extends State<UserDashboard> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: logout,
+            icon: const Icon(Icons.logout),
+            onPressed: showLogoutDialog,
             tooltip: 'Logout',
           ),
         ],
@@ -376,3 +411,4 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 }
+

@@ -1,4 +1,5 @@
 import 'package:capp/other%20screens/forgrtpassword.dart';
+import 'package:capp/other%20screens/signup.dart'; // <-- Make sure this path is correct
 import 'package:capp/screens/catere/bottom.dart';
 import 'package:capp/screens/catere/company_info.dart';
 import 'package:capp/screens/user/dasboard.dart';
@@ -50,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
             .get();
 
         if (companyInfoDoc.exists) {
-          // Already filled company info, go to dashboard
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -58,14 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         } else {
-          // First-time login → fill company info
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const CompanyInfoScreen()),
           );
         }
       } else {
-        // Regular customer user
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -73,9 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       }
-    } catch (e) {
+    } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login Failed: $e")),
+        const SnackBar(content: Text("Invalid email or password")),
       );
     }
   }
@@ -89,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/CuberLogo.png",height: 50,),
+            Image.asset("assets/images/CuberLogo.png", height: 50),
             const SizedBox(height: 30),
             TextField(
               controller: emailCtrl,
@@ -124,10 +122,32 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              
               onPressed: _loginUser,
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.red,minimumSize: const Size(double.infinity, 50)),
-              child: const Text("Login",style: TextStyle(color: Colors.white,fontSize: 23,fontWeight:FontWeight.bold ),),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.red,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                "Login",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignupScreen()),
+                );
+              },
+              child: const Text(
+                "Don’t have an account? Register",
+                style: TextStyle(color: Colors.blue),
+              ),
             ),
           ],
         ),
